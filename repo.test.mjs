@@ -25,13 +25,17 @@ test("package metadata is publishable", () => {
   assert.ok(pkg.description.length > 20)
   assert.ok(pkg.keywords.includes("opencode"))
   assert.equal(pkg.scripts.test, "node --test")
-  // The TUI runtime supplies these, so they stay optional peers; nothing the
-  // plugin does not import may appear here.
+  // The host renders with its own OpenTUI runtime, so those stay peers — but they
+  // must install with the package, because a package install resolves imports from
+  // its own tree, not the TUI's. The plugin API is a real dependency for the same
+  // reason: the server half imports it.
   assert.ok(pkg.peerDependencies["solid-js"])
   assert.ok(pkg.peerDependencies["@opentui/solid"])
+  assert.equal(pkg.peerDependenciesMeta, undefined, "peers must not be optional")
+  assert.ok(pkg.dependencies["@opencode/plugin"])
   assert.equal(pkg.peerDependencies["@opencode/plugin"], undefined)
+  assert.deepEqual(Object.keys(pkg.dependencies), ["@opencode/plugin"], "no other runtime dependencies")
   assert.match(pkg.repository.url, /opencode-qa-index\.git$/)
-  assert.equal(pkg.dependencies, undefined, "runtime dependencies must stay empty")
 })
 
 test("every file listed in package.json exists", () => {
