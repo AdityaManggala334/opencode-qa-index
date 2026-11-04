@@ -1,9 +1,11 @@
 # opencode-qa-index
 
-A sidebar index of every prompt in an [OpenCode](https://opencode.ai) V2 session.
-Each row is one turn: the question, when you asked it, which agent answered, and
-the status of the answer. Click the question to jump to it in the transcript, or
-click the status glyph to jump to the beginning of its answer.
+![test](https://github.com/AdityaManggala334/opencode-qa-index/actions/workflows/test.yml/badge.svg)
+
+A sidebar index of every prompt in an [OpenCode](https://opencode.ai) V2 session:
+the question, when you asked it, which agent answered, and the status of the
+answer. Click a question to jump to it in the transcript, or click the status
+glyph to jump to the beginning of its answer.
 
 ```
 ▼ History (19)
@@ -14,91 +16,38 @@ click the status glyph to jump to the beginning of its answer.
 search…
 ```
 
-## Status glyphs
-
-| Glyph | Meaning | Source |
-| --- | --- | --- |
-| `?` | Waiting for tool permission | pending permission request |
-| `⋯` | Answer still streaming | assistant has no `time.completed` |
-| `✗` | Failed | `finish: "error"` or a tool ended in error |
-| `±` | Finished and changed files | `snapshot.files` is not empty |
-| `✓` | Finished | `finish: "stop"` with text |
-| `≡` | Session compaction | a `compaction` message |
-
-The `Q` number is tinted by agent: `plan` uses the theme warning colour and
-`build` a darker blue. Both can be overridden.
-
-## Language
-
-The UI defaults to English, because OpenCode's own interface is English-only and
-does not expose a language setting. Indonesian is bundled:
-
-```json
-{ "options": { "language": "id" } }
-```
-
-Available: `en` (default), `id`. Unknown values fall back to English.
+TUI-only, and requires OpenCode V2 (tested on 2.2.1 and 2.2.5). History is read
+from the local server, never from a model: the panel costs no tokens and stores
+no prompts.
 
 ## Install
-
-Requires OpenCode V2 (tested on 2.2.5). This is a TUI-only plugin.
-
-### From npm
 
 ```sh
 opencode plugin add npm:opencode-qa-index
 ```
 
-Then add it to `~/.config/opencode/cli.json`:
+Then add it to `plugins` in `~/.config/opencode/cli.json`:
 
 ```json
-{
-  "$schema": "https://opencode.ai/v2/cli.json",
-  "plugins": ["opencode-qa-index"]
-}
+{ "plugins": ["opencode-qa-index"] }
 ```
 
-### From a local checkout
+To set options, use an object entry instead:
+
+```json
+{ "plugins": [{ "package": "opencode-qa-index", "options": { "language": "id" } }] }
+```
+
+Without npm, clone it where OpenCode auto-discovers plugins — no config needed:
 
 ```sh
-git clone https://github.com/<you>/opencode-qa-index.git
+git clone https://github.com/AdityaManggala334/opencode-qa-index.git \
+  ~/.config/opencode/plugins/opencode-qa-index
 ```
 
-```json
-{
-  "$schema": "https://opencode.ai/v2/cli.json",
-  "plugins": ["/absolute/path/to/opencode-qa-index"]
-}
-```
-
-On Windows, forward slashes work: `"D:/opencode-qa-index"`.
-
-OpenCode also discovers plugins placed directly in
-`~/.config/opencode/plugins/<name>/`, but do not enable both at once — the
-section would render twice.
+Enabling a checkout that also sits in that directory renders the section twice.
 
 ## Options
-
-Pass options through `cli.json`:
-
-```json
-{
-  "plugins": [
-    {
-      "package": "opencode-qa-index",
-      "options": {
-        "language": "en",
-        "rows": 12,
-        "pageSize": 200,
-        "maxPages": 50,
-        "titleLength": 18,
-        "planColor": "#ff8c00",
-        "buildColor": "#1b3a6b"
-      }
-    }
-  ]
-}
-```
 
 | Option | Default | Meaning |
 | --- | --- | --- |
@@ -110,24 +59,35 @@ Pass options through `cli.json`:
 | `planColor` | theme warning | Colour of `Q` for turns answered by `plan` |
 | `buildColor` | dark blue | Colour of `Q` for turns answered by `build` |
 
-## How the jump works
+## Status glyphs
 
-OpenCode has no public `scrollToMessage` API. The plugin dispatches the built-in
-navigation commands (`session.messages_last_user`, `session.message.user.previous`,
-`session.message.next`) with a short delay between steps. That is best-effort:
-it reaches rows the transcript has mounted, and it may break if those command ids
-change. Everything is isolated in `jump()` in `tui.tsx`.
+| Glyph | Meaning |
+| --- | --- |
+| `?` | Waiting for tool permission |
+| `⋯` | Answer still streaming |
+| `✗` | Failed |
+| `±` | Finished and changed files |
+| `✓` | Finished |
+| `≡` | Session compaction |
 
-History is fetched from the local server, never from a model, so it costs no
-tokens.
+The `Q` number is tinted by the agent that answered the turn.
+
+## Caveats
+
+- Jumping replays OpenCode's own navigation commands, one message per step at
+  about 40ms. A jump to an early turn in a long session takes seconds, and it
+  breaks if those command ids change.
+- A jump reaches the rows the transcript has mounted, not the whole history.
+- The glyphs read `finish`, `snapshot.files` and tool state, which are OpenCode
+  internals and can move between versions.
 
 ## Development
 
 ```sh
-npm test          # node --test: model, pagination, strings, contract, scenarios
+npm test
 ```
 
-There is no build step: OpenCode loads the TypeScript sources directly.
+No build step: OpenCode loads the TypeScript sources directly.
 
 ## License
 
