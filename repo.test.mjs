@@ -25,7 +25,12 @@ test("package metadata is publishable", () => {
   assert.ok(pkg.description.length > 20)
   assert.ok(pkg.keywords.includes("opencode"))
   assert.equal(pkg.scripts.test, "node --test")
-  assert.ok(pkg.peerDependencies["@opencode/plugin"])
+  // The TUI runtime supplies these, so they stay optional peers; nothing the
+  // plugin does not import may appear here.
+  assert.ok(pkg.peerDependencies["solid-js"])
+  assert.ok(pkg.peerDependencies["@opentui/solid"])
+  assert.equal(pkg.peerDependencies["@opencode/plugin"], undefined)
+  assert.match(pkg.repository.url, /opencode-qa-index\.git$/)
   assert.equal(pkg.dependencies, undefined, "runtime dependencies must stay empty")
 })
 
@@ -42,7 +47,10 @@ test("npm pack ships only runtime files", () => {
   } catch {
     return // npm unavailable (e.g. offline runner); the file list test still runs
   }
-  const shipped = JSON.parse(output)[0].files.map((entry) => entry.path).sort()
+  // npm <11 prints [entry]; npm >=11 prints { "<name>": entry }.
+  const packed = JSON.parse(output)
+  const entry = Array.isArray(packed) ? packed[0] : packed[pkg.name] ?? Object.values(packed)[0]
+  const shipped = entry.files.map((item) => item.path).sort()
   assert.deepEqual(shipped, [
     "LICENSE",
     "README.md",
