@@ -127,3 +127,38 @@ test("merge: cache wins per id and order follows creation time", () => {
     ["u1"],
   )
 })
+
+test("entries: messages before any prompt are ignored", () => {
+  const entries = entriesOf([assistant("a0"), { id: "c0", type: "compaction", status: "completed", summary: "s" }])
+  assert.deepEqual(
+    entries.map((entry) => entry.kind),
+    ["summary"],
+  )
+})
+
+test("entries: the last assistant decides a running turn", () => {
+  const entries = entriesOf([
+    user("u1", "a"),
+    assistant("a1"),
+    { ...assistant("a2"), time: { created: 30 } },
+  ])
+  assert.equal(entries[0].state, "⋯")
+})
+
+test("entries: reasoning-only answers show no symbol", () => {
+  const entries = entriesOf([user("u1", "a"), assistant("a1", [{ type: "reasoning", text: "thinking" }])])
+  assert.equal(entries[0].state, undefined)
+})
+
+test("entries: consecutive compactions keep their order", () => {
+  const entries = entriesOf([
+    user("u1", "a"),
+    assistant("a1"),
+    { id: "c1", type: "compaction", status: "completed", summary: "satu" },
+    { id: "c2", type: "compaction", status: "running", summary: "dua" },
+  ])
+  assert.deepEqual(
+    entries.map((entry) => entry.kind),
+    ["turn", "summary", "summary"],
+  )
+})

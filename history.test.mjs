@@ -89,3 +89,31 @@ test("reads every response envelope shape", async () => {
     assert.equal(all.length, Array.isArray(response) || response.data ? 1 : 0)
   }
 })
+
+test("sessionID is sent on every page", async () => {
+  const seen = []
+  const client = {
+    message: {
+      list: async (input) => {
+        seen.push(input.sessionID)
+        return seen.length === 1 ? { data: [], cursor: { next: "c1" } } : { data: [], cursor: { next: null } }
+      },
+    },
+  }
+  await fetchAllMessages(client, "ses_9", { pages: 5 })
+  assert.deepEqual(seen, ["ses_9", "ses_9"])
+})
+
+test("page cap of one makes exactly one call", async () => {
+  let calls = 0
+  const client = {
+    message: {
+      list: async () => {
+        calls++
+        return { data: [], cursor: { next: "again" } }
+      },
+    },
+  }
+  assert.deepEqual(await fetchAllMessages(client, "ses_1", { pages: 1 }), [])
+  assert.equal(calls, 1)
+})
