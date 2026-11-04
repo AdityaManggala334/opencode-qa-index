@@ -2,6 +2,7 @@
 import { createEffect, createSignal, For, onMount, Show } from "solid-js"
 import { clip, clock, entriesOf, flat, mergeMessages, numberOption } from "./logic.js"
 import { fetchAllMessages } from "./history.js"
+import { texts } from "./strings.js"
 
 // Sidebar index of a session's turns: the prompt is text, the answer is one
 // status glyph at the right edge. Clicking either scrolls the transcript there.
@@ -58,6 +59,7 @@ const click = (run) => (event) => {
 function Panel(props) {
   const ctx = props.ctx
   const theme = ctx.theme
+  const strings = texts(typeof ctx.options?.language === "string" ? ctx.options.language : undefined)
   const rows = numberOption(ctx.options?.rows, 12)
   const pageSize = numberOption(ctx.options?.pageSize, 200)
   const maxPages = numberOption(ctx.options?.maxPages, 50)
@@ -126,11 +128,11 @@ function Panel(props) {
     ctx.ui.dialog.show(() => (
       <box flexDirection="column" height="100%" padding={1} gap={1}>
         <text fg={theme.text.base}>
-          <b>Ringkasan sesi</b>
+          <b>{strings.summaryTitle}</b>
         </text>
         <scrollbox flexGrow={1} minHeight={0}>
           <text fg={theme.text.base} wrapMode="word">
-            {entry.summary || "(ringkasan kosong)"}
+            {entry.summary || strings.summaryEmpty}
           </text>
         </scrollbox>
       </box>
@@ -140,8 +142,8 @@ function Panel(props) {
   const pick = async () => {
     const turns = entries().filter((entry) => entry.kind === "turn")
     const chosen = await ctx.ui.dialog.select({
-      title: "Riwayat pertanyaan",
-      placeholder: "Cari pertanyaan",
+      title: strings.pickerTitle,
+      placeholder: strings.pickerPlaceholder,
       options: turns
         .slice()
         .reverse()
@@ -187,7 +189,7 @@ function Panel(props) {
       <box flexDirection="row" gap={1} onMouseUp={click(toggle)}>
         <text fg={theme.text.base}>{open.open ? "▼" : "▶"}</text>
         <text fg={theme.text.base}>
-          <b>Riwayat</b>
+          <b>{strings.title}</b>
           <span style={{ fg: theme.text.muted }}>{` (${entries().filter((entry) => entry.kind === "turn").length})`}</span>
         </text>
       </box>
@@ -196,7 +198,7 @@ function Panel(props) {
           when={entries().length > 0}
           fallback={
             <text fg={theme.text.muted} wrapMode="word">
-              Belum ada pertanyaan.
+              {strings.empty}
             </text>
           }
         >
@@ -205,7 +207,7 @@ function Panel(props) {
               <For each={entries()}>{(entry) => row(entry)}</For>
             </scrollbox>
             <text fg={theme.text.muted} onMouseUp={click(pick)}>
-              cari…
+              {strings.search}
             </text>
           </box>
         </Show>

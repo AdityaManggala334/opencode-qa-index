@@ -13,6 +13,7 @@
     "tui.tsx",
     "logic.js",
     "history.js",
+    "strings.js",
     "README.md",
     "LICENSE"
   ],

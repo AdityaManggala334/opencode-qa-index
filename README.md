@@ -6,12 +6,12 @@ the status of the answer. Click the question to jump to it in the transcript, or
 click the status glyph to jump to the beginning of its answer.
 
 ```
-▼ Riwayat (19)
- Q1  [09.30] buatlah agar settingan…   ✓
- Q2  [09.41] apakah opencode bisa…    ±
-   ≡ [09.52] ringkasan
- Q3  [10.02] refactor auth…            ⋯
-cari…
+▼ History (19)
+ Q1  [09.30] configure the settings so that…   ✓
+ Q2  [09.41] is OpenCode an option…            ±
+   ≡ [09.52] summary
+ Q3  [10.02] refactor auth…                    ⋯
+search…
 ```
 
 ## Status glyphs
@@ -25,8 +25,19 @@ cari…
 | `✓` | Finished | `finish: "stop"` with text |
 | `≡` | Session compaction | a `compaction` message |
 
-The `Q` number is tinted by agent: `plan` is the theme warning colour, `build`
-is a darker blue. Both can be overridden.
+The `Q` number is tinted by agent: `plan` uses the theme warning colour and
+`build` a darker blue. Both can be overridden.
+
+## Language
+
+The UI defaults to English, because OpenCode's own interface is English-only and
+does not expose a language setting. Indonesian is bundled:
+
+```json
+{ "options": { "language": "id" } }
+```
+
+Available: `en` (default), `id`. Unknown values fall back to English.
 
 ## Install
 
@@ -76,6 +87,7 @@ Pass options through `cli.json`:
     {
       "package": "opencode-qa-index",
       "options": {
+        "language": "en",
         "rows": 12,
         "pageSize": 200,
         "maxPages": 50,
@@ -90,6 +102,7 @@ Pass options through `cli.json`:
 
 | Option | Default | Meaning |
 | --- | --- | --- |
+| `language` | `en` | Interface strings: `en` or `id` |
 | `rows` | `12` | Visible rows before the list scrolls |
 | `pageSize` | `200` | Messages per history request (server caps this) |
 | `maxPages` | `50` | Safety bound for very large sessions |
@@ -111,7 +124,7 @@ tokens.
 ## Development
 
 ```sh
-npm test          # node --test: model, pagination, plugin contract, scenarios
+npm test          # node --test: model, pagination, strings, contract, scenarios
 ```
 
 There is no build step: OpenCode loads the TypeScript sources directly.
