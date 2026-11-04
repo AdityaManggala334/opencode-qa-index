@@ -16,36 +16,50 @@ glyph to jump to the beginning of its answer.
 search…
 ```
 
-TUI-only, and requires OpenCode V2 (tested on 2.2.1 and 2.2.5). History is read
-from the local server, never from a model: the panel costs no tokens and stores
-no prompts.
+History is read from the local server, never from a model: the panel costs no
+tokens and stores no prompts. TUI-only; requires OpenCode V2 (tested on 2.2.1
+and 2.2.5).
 
 ## Install
 
-```sh
-opencode plugin add npm:opencode-qa-index
-```
-
-Then add it to `plugins` in `~/.config/opencode/cli.json`:
-
-```json
-{ "plugins": ["opencode-qa-index"] }
-```
-
-To set options, use an object entry instead:
-
-```json
-{ "plugins": [{ "package": "opencode-qa-index", "options": { "language": "id" } }] }
-```
-
-Without npm, clone it where OpenCode auto-discovers plugins — no config needed:
+The cheapest way — no dependencies, no configuration. OpenCode discovers plugins
+in its plugin directory:
 
 ```sh
 git clone https://github.com/AdityaManggala334/opencode-qa-index.git \
   ~/.config/opencode/plugins/opencode-qa-index
 ```
 
-Enabling a checkout that also sits in that directory renders the section twice.
+Reload the TUI (`/reload`) and the section appears.
+
+### With options
+
+Point `cli.json` at a checkout instead. Options are only passed from this file —
+`opencode.json` takes a package name, without options:
+
+```json
+{
+  "plugins": [
+    {
+      "package": "/absolute/path/to/opencode-qa-index",
+      "options": { "language": "id" }
+    }
+  ]
+}
+```
+
+### From npm
+
+```sh
+opencode plugin add npm:opencode-qa-index
+```
+
+The CLI loads the `./tui` part of a registered package automatically, so there
+is nothing else to configure — and do not also list it in `cli.json` just to
+enable it. Use both at once and the section renders twice.
+
+This route installs the OpenTUI and Effect runtime next to the plugin (a few
+hundred MB in OpenCode's plugin cache). The git clone above needs none of it.
 
 ## Options
 
@@ -75,7 +89,7 @@ The `Q` number is tinted by the agent that answered the turn.
 ## Caveats
 
 - Jumping replays OpenCode's own navigation commands, one message per step at
-  about 40ms. A jump to an early turn in a long session takes seconds, and it
+  about 40ms, so a jump to an early turn in a long session takes seconds. It
   breaks if those command ids change.
 - A jump reaches the rows the transcript has mounted, not the whole history.
 - The glyphs read `finish`, `snapshot.files` and tool state, which are OpenCode
