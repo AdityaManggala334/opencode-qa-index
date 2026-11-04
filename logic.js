@@ -49,7 +49,7 @@ export function stateOf(assistants, pendingPermission = false) {
   return undefined
 }
 
-export function entriesOf(messages, pendingPermission = false) {
+export function entriesOf(messages, pendingPermission = false, summaryRow = "summary") {
   const raw = []
   let turn = undefined
   let agent = undefined
@@ -76,7 +76,7 @@ export function entriesOf(messages, pendingPermission = false) {
       raw.push({
         kind: "summary",
         id: message.id,
-        title: "ringkasan",
+        title: summaryRow,
         created: message.time?.created ?? 0,
         summary: message.summary ?? "",
       })

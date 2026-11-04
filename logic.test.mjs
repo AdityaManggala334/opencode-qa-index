@@ -80,10 +80,16 @@ test("entries: numbering, skipped blank prompts, compaction rows", () => {
     [
       ["turn", 1, "u1", "✓"],
       ["turn", 2, "u2", "⋯"],
-      ["summary", "ringkasan", "ringkasan sesi"],
+      ["summary", "summary", "ringkasan sesi"],
       ["turn", 3, "u4", "✗"],
     ],
   )
+})
+
+test("entries: the compaction row label comes from the language option", () => {
+  const messages = [{ id: "c1", type: "compaction", status: "completed", summary: "s" }]
+  assert.equal(entriesOf(messages)[0].title, "summary")
+  assert.equal(entriesOf(messages, false, "ringkasan")[0].title, "ringkasan")
 })
 
 test("entries: pending approval only decorates the newest turn", () => {

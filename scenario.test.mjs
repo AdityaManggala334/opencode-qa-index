@@ -66,7 +66,7 @@ test("scenario: sidebar shows Q1..Q4 with time, agent and status", async () => {
     entries.map((entry) =>
       entry.kind === "summary" ? ["summary", entry.title] : [`Q${entry.index}`, entry.state, entry.agent],
     ),
-    [["Q1", "✓", "plan"], ["Q2", "±", "build"], ["summary", "ringkasan"], ["Q3", "✗", "build"], ["Q4", "⋯", "build"]],
+    [["Q1", "✓", "plan"], ["Q2", "±", "build"], ["summary", "summary"], ["Q3", "✗", "build"], ["Q4", "⋯", "build"]],
   )
 
   for (const entry of entries) assert.match(clock(entry.created), /^\[\d{2}\.\d{2}\]$/)

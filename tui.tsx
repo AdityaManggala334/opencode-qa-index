@@ -120,7 +120,11 @@ function Panel(props) {
   }
   const entries = () => {
     props.version()
-    return entriesOf(mergeMessages(history(), ctx.data.session.message.list(props.sessionID) ?? []), pending())
+    return entriesOf(
+      mergeMessages(history(), ctx.data.session.message.list(props.sessionID) ?? []),
+      pending(),
+      strings.summaryRow,
+    )
   }
 
   const showSummary = (entry) => {
